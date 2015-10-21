@@ -1,6 +1,7 @@
 package com.licheedev.handleimedemo;
 
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
@@ -28,6 +29,8 @@ public class MainActivity extends AppCompatActivity
     private InputMethodManager mInputMethodManager;
 
     private static final String CONFIG_IME_HEIGHT = "config_ime_height";
+    private LinearLayout mLlParent;
+    private OnImeSizeChangedListener mOnImeSizeChangedListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,13 +40,30 @@ public class MainActivity extends AppCompatActivity
         initViews();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        hideIme();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            mLlParent.getViewTreeObserver().removeOnGlobalLayoutListener(mOnImeSizeChangedListener);
+        } else {
+            mLlParent.getViewTreeObserver().removeGlobalOnLayoutListener(mOnImeSizeChangedListener);
+        }
+    }
+
     private void initService() {
         mInputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
     }
 
     private void initViews() {
-        LinearLayout llParent = (LinearLayout) findViewById(R.id.llParent);
-        llParent.getViewTreeObserver().addOnGlobalLayoutListener(new OnImeSizeChangedListener());
+        mLlParent = (LinearLayout) findViewById(R.id.llParent);
+        mOnImeSizeChangedListener = new OnImeSizeChangedListener();
+        mLlParent.getViewTreeObserver().addOnGlobalLayoutListener(mOnImeSizeChangedListener);
         // 消息列表
         mListView = (ListView) findViewById(R.id.lvMsgs);
         mListView.setOnTouchListener(new OnListViewTouchListener());
@@ -144,24 +164,24 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    hideIme();
-                    if (mBottomLayout.getVisibility() == View.VISIBLE) {
-                        mBottomLayout.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                mBottomLayout.showArea(BottomLayout.Area.GONE);
-                            }
-                        }, 200);
-                    }
-                    return true;
-                default:
-                    return false;
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                
+                hideIme();
+                
+                if (mBottomLayout.getVisibility() == View.VISIBLE) {
+                    mBottomLayout.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mBottomLayout.showArea(BottomLayout.Area.GONE);
+                        }
+                    }, 100);
+                }
             }
-
+            return false;
         }
+
     }
+
 
     @Override
     public void onBackPressed() {
