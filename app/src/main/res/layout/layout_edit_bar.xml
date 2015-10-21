@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <Button
+        android:id="@+id/btnAdd"
+        android:layout_width="56dp"
+        android:layout_height="48dp"
+        android:text="添加" />
+
+    <Button
+        android:id="@+id/btnEmoji"
+        android:layout_width="56dp"
+        android:layout_height="48dp"
+        android:text="表情" />
+
+    <EditText
+        android:id="@+id/etContent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:hint="请输入内容"
+        android:maxLines="5" />
+
+
+    <Button
+        android:id="@+id/btnVoice"
+        android:layout_width="56dp"
+        android:layout_height="48dp"
+        android:text="语音" />
+
+
+</LinearLayout>
