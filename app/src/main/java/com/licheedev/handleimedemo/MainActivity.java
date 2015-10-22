@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initService() {
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         mInputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
     }
 
@@ -128,11 +129,13 @@ public class MainActivity extends AppCompatActivity
                 mBottomLayout.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        getWindow()
-                            .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-                        mBottomLayout.showArea(BottomLayout.Area.GONE);
+                        if (mEtContent.isFocused()) {
+                            getWindow().setSoftInputMode(
+                                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+                            mBottomLayout.showArea(BottomLayout.Area.GONE);
+                        }
                     }
-                }, 500);
+                }, 200);
             }
         }
     }
