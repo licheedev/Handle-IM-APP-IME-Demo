@@ -17,8 +17,7 @@ import com.licheedev.handleimedemo.wiget.BottomLayout;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity
-    implements View.OnClickListener, View.OnFocusChangeListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private ListView mListView;
     private BottomLayout mBottomLayout;
@@ -50,9 +49,11 @@ public class MainActivity extends AppCompatActivity
     protected void onDestroy() {
         super.onDestroy();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            mLlParent.getViewTreeObserver().removeOnGlobalLayoutListener(mOnImeSizeChangedListener);
+            mLlParent.getViewTreeObserver()
+                .removeOnGlobalLayoutListener(mOnImeSizeChangedListener);
         } else {
-            mLlParent.getViewTreeObserver().removeGlobalOnLayoutListener(mOnImeSizeChangedListener);
+            mLlParent.getViewTreeObserver()
+                .removeGlobalOnLayoutListener(mOnImeSizeChangedListener);
         }
     }
 
@@ -64,7 +65,8 @@ public class MainActivity extends AppCompatActivity
     private void initViews() {
         mLlParent = (LinearLayout) findViewById(R.id.llParent);
         mOnImeSizeChangedListener = new OnImeSizeChangedListener();
-        mLlParent.getViewTreeObserver().addOnGlobalLayoutListener(mOnImeSizeChangedListener);
+        mLlParent.getViewTreeObserver()
+            .addOnGlobalLayoutListener(mOnImeSizeChangedListener);
         // 消息列表
         mListView = (ListView) findViewById(R.id.lvMsgs);
         mListView.setOnTouchListener(new OnListViewTouchListener());
@@ -86,7 +88,7 @@ public class MainActivity extends AppCompatActivity
         mBtnVoice.setOnClickListener(this);
         // 内容编辑框
         mEtContent = (EditText) findViewById(R.id.etContent);
-        mEtContent.setOnFocusChangeListener(this);
+        mEtContent.setOnClickListener(this);
     }
 
     private void showArea(BottomLayout.Area area) {
@@ -97,9 +99,10 @@ public class MainActivity extends AppCompatActivity
 
     private void hideIme() {
         mInputMethodManager.hideSoftInputFromWindow(mEtContent.getWindowToken(), 0);
-        if (mEtContent.isFocused()) {
-            mEtContent.clearFocus();
-        }
+    }
+
+    private void showIme() {
+        mInputMethodManager.showSoftInput(mEtContent, InputMethodManager.SHOW_IMPLICIT);
     }
 
     @Override
@@ -114,29 +117,30 @@ public class MainActivity extends AppCompatActivity
             case R.id.btnVoice:
                 showArea(BottomLayout.Area.VOICE);
                 break;
+            case R.id.etContent:
+                onEditTextClick();
+                break;
             default:
                 break;
         }
     }
 
-    @Override
-    public void onFocusChange(View v, boolean hasFocus) {
-        if (hasFocus) {
-            if (mBottomLayout.getVisibility() == View.GONE) {
-                getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-            } else {
-                mBottomLayout.showArea(BottomLayout.Area.NONE);
-                mBottomLayout.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mEtContent.isFocused()) {
-                            getWindow().setSoftInputMode(
-                                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-                            mBottomLayout.showArea(BottomLayout.Area.GONE);
-                        }
+    private void onEditTextClick() {
+        if (mBottomLayout.getVisibility() == View.GONE) {
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+            showIme();
+        } else {
+            mBottomLayout.showArea(BottomLayout.Area.NONE);
+            showIme();
+            mBottomLayout.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (mEtContent.isFocused()) {
+                        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+                        mBottomLayout.showArea(BottomLayout.Area.GONE);
                     }
-                }, 200);
-            }
+                }
+            }, 200);
         }
     }
 
@@ -150,13 +154,16 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onGlobalLayout() {
             Rect rect = new Rect();
-            getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
+            getWindow().getDecorView()
+                .getWindowVisibleDisplayFrame(rect);
             max = rect.bottom > max ? rect.bottom : max;
             int size = max - rect.bottom;
             if (size > lowerLimit && size < upperLimit) {
                 if (size != mBottomLayout.getLayoutHeight()) {
                     mBottomLayout.setLayoutHeight(size);
-                    getPreferences(MODE_PRIVATE).edit().putInt(CONFIG_IME_HEIGHT, size).apply();
+                    getPreferences(MODE_PRIVATE).edit()
+                        .putInt(CONFIG_IME_HEIGHT, size)
+                        .apply();
                 }
             }
 
@@ -168,9 +175,9 @@ public class MainActivity extends AppCompatActivity
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                
+
                 hideIme();
-                
+
                 if (mBottomLayout.getVisibility() == View.VISIBLE) {
                     mBottomLayout.postDelayed(new Runnable() {
                         @Override
